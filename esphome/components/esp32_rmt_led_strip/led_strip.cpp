@@ -179,6 +179,15 @@ void ESP32RMTLEDStripLightOutput::write_state(light::LightState *state) {
   }
   delayMicroseconds(50);
 
+  static constexpr auto CURRENT_LIMIT = 3000.f; /* mA */
+  static constexpr auto LED_CONSUMPTION = 20.f; /* mA */
+  const auto full_consumption = this->num_leds_ * LED_CONSUMPTION;
+  const auto mux = std::min(CURRENT_LIMIT / full_consumption, 1.f);
+
+  for (size_t i = 0; i < this->get_buffer_size_(); i++) {
+    this->buf_[i] *= limit;
+  }
+
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 3, 0)
   memcpy(this->rmt_buf_, this->buf_, this->get_buffer_size_());
 #else
